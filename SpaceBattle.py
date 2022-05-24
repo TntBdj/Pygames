@@ -4,7 +4,7 @@ pygame.font.init()
 
 WIDTH, HEIGHT = 900, 500
 WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("SapceBattle")
+pygame.display.set_caption("SpaceBattle")
 
 SPACEPURPLE = (251,248,253)
 BLACK = (0, 0, 0)
@@ -20,6 +20,7 @@ VEL = 5
 ALIEN_HIT = pygame.USEREVENT + 1
 HUMAN_HIT = pygame.USEREVENT + 2
 HEALTHFONT = pygame.font.SysFont("comicsans", 40)
+WINNERFONT = pygame.font.SysFont("comicsans", 100)
 
 ALIEN_SHIP = pygame.image.load(
     os.path.join("SoundImage", "AlienShip.png"))
@@ -87,6 +88,12 @@ def BulletsFunction(Alien_Bullets, Human_Bullets, Alien, Human):
         elif Bullet.x > WIDTH:
             Human_Bullets.remove(Bullet)
 
+def Winner(text):
+    DrawText = WINNERFONT.render(text, 1, SPACEPURPLE)
+    WINDOW.blit(DrawText, (WIDTH/2 - DrawText.get_width()/2, HEIGHT/2 - DrawText.get_height()/2))
+    pygame.display.update()
+    pygame.time.delay(5000)
+
 def Main():
     Alien = pygame.Rect(700, 300, SHIPWIDTH, SHIPLENGTH)
     Human = pygame.Rect(100, 300, SHIPWIDTH, SHIPLENGTH)
@@ -123,7 +130,8 @@ def Main():
         if HumanHP <= 0:
             WinnerText = "Alien Wins!"
         if WinnerText != "":
-            print(WinnerText)
+            Winner(WinnerText)
+            break
 
         BulletsFunction(Alien_Bullets, Human_Bullets, Alien, Human)
         KeysPressed = pygame.key.get_pressed()
