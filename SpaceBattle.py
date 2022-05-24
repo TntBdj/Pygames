@@ -1,15 +1,20 @@
 import pygame
 import os
 pygame.font.init()
+pygame.mixer.init()
 
 WIDTH, HEIGHT = 900, 500
 WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("SpaceBattle")
 
+#Colors!
 SPACEPURPLE = (251,248,253)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
+
+
+
 BORDER = pygame.Rect(WIDTH//2 - 5, 0, 10, HEIGHT)
 FPS = 60
 SHIPWIDTH = 70
@@ -17,16 +22,24 @@ SHIPLENGTH = 70
 BULLET_VEL = 7
 MAX_BULLETS = 3
 VEL = 5
+
+#weird events that are made when something is hit
 ALIEN_HIT = pygame.USEREVENT + 1
 HUMAN_HIT = pygame.USEREVENT + 2
+
+#bullet hit sounds
+BULLET_HIT = pygame.mixer.Sound(os.path.join("SoundImage","Explosion.mp3"))
+BULLET_FIRE = pygame.mixer.Sound(os.path.join("SoundImage","LazerShot.wav"))
+
+#assigning fonts
 HEALTHFONT = pygame.font.SysFont("comicsans", 40)
 WINNERFONT = pygame.font.SysFont("comicsans", 100)
 
-ALIEN_SHIP = pygame.image.load(
-    os.path.join("SoundImage", "AlienShip.png"))
+
+#image transformations and getting images from the SoundImaage folder 
+ALIEN_SHIP = pygame.image.load(os.path.join("SoundImage", "AlienShip.png"))
 ALIEN_SHIP = pygame.transform.rotate(pygame.transform.scale(ALIEN_SHIP, (SHIPWIDTH, SHIPLENGTH)), 90)
-HUMAN_SHIP = pygame.image.load(
-    os.path.join("SoundImage", "HumanShip.png"))
+HUMAN_SHIP = pygame.image.load(os.path.join("SoundImage", "HumanShip.png"))
 HUMAN_SHIP = pygame.transform.rotate(pygame.transform.scale(HUMAN_SHIP, (SHIPWIDTH, SHIPLENGTH)), 270)
 
 SPACE = pygame.transform.scale(pygame.image.load(os.path.join("SoundImage", "Space.png")), (WIDTH, HEIGHT))
@@ -111,18 +124,22 @@ def Main():
             if event.type == pygame.QUIT:
                 Run = False
 
-#What Bullets are shot, when and size
+#What Bullets are shot, when, how and size
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RCTRL and len(Alien_Bullets) < MAX_BULLETS:
                     Bullet = pygame.Rect(Alien.x, Alien.y + Alien.height//2 - 2, 10, 5)
                     Alien_Bullets.append(Bullet)
+                    BULLET_FIRE.play()
                 if event.key == pygame.K_LCTRL and len(Human_Bullets) < MAX_BULLETS:
                     Bullet = pygame.Rect(Human.x + ((SHIPLENGTH/7)*6), Human.y + Human.height//2 - 2, 10, 5)
                     Human_Bullets.append(Bullet)
+                    BULLET_FIRE.play()
             if event.type == ALIEN_HIT:
                 AlienHP -= 1
+                BULLET_HIT.play()
             if event.type == HUMAN_HIT:
                 HumanHP -= 1
+                BULLET_HIT.play()
         
         WinnerText = ""
         if AlienHP <= 0:
