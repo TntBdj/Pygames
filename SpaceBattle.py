@@ -14,8 +14,7 @@ RED = (255, 0, 0)
 YELLOW = (255, 255, 0)
 
 
-
-BORDER = pygame.Rect(WIDTH//2 - 5, 0, 10, HEIGHT)
+BORDER = pygame.Rect(0, HEIGHT//2 - 5, WIDTH, 5)
 FPS = 60
 SHIPWIDTH = 70
 SHIPLENGTH = 70
@@ -28,7 +27,7 @@ ALIEN_HIT = pygame.USEREVENT + 1
 HUMAN_HIT = pygame.USEREVENT + 2
 
 #bullet hit sounds
-BULLET_HIT = pygame.mixer.Sound(os.path.join("SoundImage","Explosion.mp3"))
+BULLET_HIT = pygame.mixer.Sound(os.path.join("SoundImage","LazerShot.wav"))
 BULLET_FIRE = pygame.mixer.Sound(os.path.join("SoundImage","LazerShot.wav"))
 
 #assigning fonts
@@ -38,9 +37,9 @@ WINNERFONT = pygame.font.SysFont("comicsans", 100)
 
 #image transformations and getting images from the SoundImaage folder 
 ALIEN_SHIP = pygame.image.load(os.path.join("SoundImage", "AlienShip.png"))
-ALIEN_SHIP = pygame.transform.rotate(pygame.transform.scale(ALIEN_SHIP, (SHIPWIDTH, SHIPLENGTH)), 90)
+ALIEN_SHIP = pygame.transform.scale(ALIEN_SHIP, (SHIPWIDTH, SHIPLENGTH))
 HUMAN_SHIP = pygame.image.load(os.path.join("SoundImage", "HumanShip.png"))
-HUMAN_SHIP = pygame.transform.rotate(pygame.transform.scale(HUMAN_SHIP, (SHIPWIDTH, SHIPLENGTH)), 270)
+HUMAN_SHIP = pygame.transform.rotate(pygame.transform.scale(HUMAN_SHIP, (SHIPWIDTH, SHIPLENGTH)), 180)
 
 SPACE = pygame.transform.scale(pygame.image.load(os.path.join("SoundImage", "Space.png")), (WIDTH, HEIGHT))
 
@@ -50,11 +49,13 @@ def PurpleWindow(Alien, Human, Human_Bullets, Alien_Bullets, AlienHP, HumanHP):
 
     AlienHPTxt = HEALTHFONT.render("Health: " + str(AlienHP),1 , SPACEPURPLE)
     HumanHPTxt = HEALTHFONT.render("Health: " + str(HumanHP),1 , SPACEPURPLE)
-    WINDOW.blit(AlienHPTxt, (WIDTH - AlienHPTxt.get_width()-10, 10))
-    WINDOW.blit(HumanHPTxt, (10, 10))
 
-    WINDOW.blit(ALIEN_SHIP, (Alien.x, Alien.y))
-    WINDOW.blit(HUMAN_SHIP, (Human.x, Human.y))
+    WINDOW.blit(AlienHPTxt, (WIDTH - AlienHPTxt.get_width()-10, 10))
+    WINDOW.blit(HumanHPTxt, (10, HEIGHT - HumanHPTxt.get_height()- 10))
+
+#MAYBE SOMETHING WITH THIS
+    WINDOW.blit(ALIEN_SHIP, (Alien.x, Alien.y + 50))
+    WINDOW.blit(HUMAN_SHIP, (Human.x, Human.y - 250))
 
 
 #Drawing Bullets for both ships
@@ -66,39 +67,39 @@ def PurpleWindow(Alien, Human, Human_Bullets, Alien_Bullets, AlienHP, HumanHP):
     pygame.display.update()
 
 def HumanMovementKeys(KeysPressed, Human):
-    if KeysPressed[pygame.K_a] and Human.x - VEL > 0:
+    if KeysPressed[pygame.K_a] and Human.x + 10 > 0:
         Human.x -= VEL
-    if KeysPressed[pygame.K_d] and Human.x + VEL + Human.width < BORDER.x:
+    if KeysPressed[pygame.K_d] and Human.x + Human.width - 10 < WIDTH:
         Human.x += VEL
-    if KeysPressed[pygame.K_w] and Human.y - VEL > 0:
+    if KeysPressed[pygame.K_w] and Human.y > HEIGHT/2:
         Human.y -= VEL
-    if KeysPressed[pygame.K_s] and Human.y + VEL + Human.height < HEIGHT:
+    if KeysPressed[pygame.K_s] and Human.y < HEIGHT - Human.width:
         Human.y += VEL
 
 def AlienMovementKeys(KeysPressed, Alien):
-    if KeysPressed[pygame.K_LEFT] and Alien.x - VEL > BORDER.x + BORDER.width:
+    if KeysPressed[pygame.K_LEFT] and Alien.x > 0:
         Alien.x -= VEL
-    if KeysPressed[pygame.K_RIGHT] and Alien.x + VEL + Alien.width < WIDTH:
+    if KeysPressed[pygame.K_RIGHT] and Alien.x + Alien.width < WIDTH:
         Alien.x += VEL
-    if KeysPressed[pygame.K_UP] and Alien.y - VEL > 0:
+    if KeysPressed[pygame.K_UP] and Alien.y + 50 > HEIGHT / 2:
         Alien.y -= VEL
-    if KeysPressed[pygame.K_DOWN] and Alien.y + VEL + Alien.height < HEIGHT:
+    if KeysPressed[pygame.K_DOWN] and Alien.y + 50 + Alien.height < HEIGHT:
         Alien.y += VEL
 
 def BulletsFunction(Alien_Bullets, Human_Bullets, Alien, Human):
     for Bullet in Alien_Bullets:
-        Bullet.x -= BULLET_VEL
+        Bullet.y -= BULLET_VEL
         if Human.colliderect(Bullet):
             pygame.event.post(pygame.event.Event(HUMAN_HIT))
             Alien_Bullets.remove(Bullet)
-        elif Bullet.x < 0:
+        elif Bullet.y < 0:
             Alien_Bullets.remove(Bullet)
     for Bullet in Human_Bullets:
-        Bullet.x += BULLET_VEL
+        Bullet.y += BULLET_VEL
         if Alien.colliderect(Bullet):
             pygame.event.post(pygame.event.Event(ALIEN_HIT))
             Human_Bullets.remove(Bullet)
-        elif Bullet.x > WIDTH:
+        elif Bullet.y > WIDTH:
             Human_Bullets.remove(Bullet)
 
 def Winner(text):
@@ -127,11 +128,11 @@ def Main():
 #What Bullets are shot, when, how and size
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_RCTRL and len(Alien_Bullets) < MAX_BULLETS:
-                    Bullet = pygame.Rect(Alien.x, Alien.y + Alien.height//2 - 2, 10, 5)
+                    Bullet = pygame.Rect(Alien.x + Alien.width/2, Alien.y + 50, 5, 10)
                     Alien_Bullets.append(Bullet)
                     BULLET_FIRE.play()
                 if event.key == pygame.K_LCTRL and len(Human_Bullets) < MAX_BULLETS:
-                    Bullet = pygame.Rect(Human.x + ((SHIPLENGTH/7)*6), Human.y + Human.height//2 - 2, 10, 5)
+                    Bullet = pygame.Rect(Human.x + Human.width/2, Human.y - 100, 5, 10)
                     Human_Bullets.append(Bullet)
                     BULLET_FIRE.play()
             if event.type == ALIEN_HIT:
