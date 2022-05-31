@@ -49,7 +49,7 @@ FFHUMAN = pygame.transform.rotate(pygame.transform.scale(FFHUMAN, (FFSIZE+ 50, F
 
 SPACE = pygame.transform.scale(pygame.image.load(os.path.join("SoundImage", "Space.png")), (WIDTH, HEIGHT))
 
-def PurpleWindow(Alien, Human, Human_Bullets, Alien_Bullets, AlienHP, HumanHP):
+def PurpleWindow(Alien, Human, Human_Bullets, Alien_Bullets, AlienHP, HumanHP, AlienForce, HumanForce):
     WINDOW.blit(SPACE, (0, 0))
     pygame.draw.rect(WINDOW, BLACK, BORDER)
 
@@ -62,8 +62,12 @@ def PurpleWindow(Alien, Human, Human_Bullets, Alien_Bullets, AlienHP, HumanHP):
 #MAYBE SOMETHING WITH THIS
     WINDOW.blit(ALIEN_SHIP, (Alien.x, Alien.y))
     WINDOW.blit(HUMAN_SHIP, (Human.x, Human.y))
-    WINDOW.blit(FFALIEN, (Alien.x - 65, Alien.y -45))
-    WINDOW.blit(FFHUMAN, (Human.x - 90, Human.y -55))
+
+#when the feilds show
+    if AlienForce == True:
+        WINDOW.blit(FFALIEN, (Alien.x - 65, Alien.y -45))
+    if HumanForce == True:
+        WINDOW.blit(FFHUMAN, (Human.x - 90, Human.y -55))
 
 
 #Drawing Bullets for both ships
@@ -124,6 +128,8 @@ def Main():
     Human_Bullets = []
     AlienHP = 10
     HumanHP = 10
+    AlienForce = False
+    HumanForce = False
 
     Clock = pygame.time.Clock()
     Run = True
@@ -132,6 +138,18 @@ def Main():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 Run = False
+
+#forceFeild show and clear keys
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_RSHIFT:
+                    AlienForce = True
+                else: 
+                    AlienForce = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_LSHIFT:
+                    HumanForce = True
+                else: 
+                    HumanForce = False
 
 #What Bullets are shot, when, how and size
             if event.type == pygame.KEYDOWN:
@@ -143,19 +161,20 @@ def Main():
                     Bullet = pygame.Rect(Human.x + Human.width/2, Human.y + Human.height, 2.5, 10)
                     Human_Bullets.append(Bullet)
                     BULLET_FIRE.play()
-            if event.type == ALIEN_HIT:
+            if event.type == ALIEN_HIT and HumanForce == False:
                 AlienHP -= 1
                 BULLET_HIT.play()
-            if event.type == HUMAN_HIT:
+            if event.type == HUMAN_HIT and HumanForce == False:
                 HumanHP -= 1
                 BULLET_HIT.play()
-        
+
+
 
         BulletsFunction(Alien_Bullets, Human_Bullets, Alien, Human)
         KeysPressed = pygame.key.get_pressed()
         HumanMovementKeys(KeysPressed, Human)
         AlienMovementKeys(KeysPressed, Alien)
-        PurpleWindow(Alien, Human, Human_Bullets, Alien_Bullets, AlienHP, HumanHP)
+        PurpleWindow(Alien, Human, Human_Bullets, Alien_Bullets, AlienHP, HumanHP, AlienForce, HumanForce)
         WinnerText = ""
         if AlienHP <= 0:
             WinnerText = "Human Wins!"
